@@ -1,0 +1,129 @@
+#!/usr/bin/python3
+import os, sys
+sys.path.append("/usr/lib")
+import _kipr as k
+
+
+tl = 3 #top left wheel
+bl = 2 #bottom left wheel
+br = 0 #bottom right wheel
+tr = 1 #top right wheel
+arm = 3
+claw = 2
+
+def go_straight(cm, speed):
+    for i in range(4):
+      	k.mav(i, speed)
+    k.msleep(cm * 66)
+
+
+def slide_right(cm):
+    k.mav(tl, 500)
+    k.mav(br, 500)
+    k.mav(tr, -500)
+    k.mav(bl, -500)
+    k.msleep(cm * 66)
+    k.ao()
+    
+def slide_left(cm):
+    k.mav(tl, -500)
+    k.mav(br, -500)
+    k.mav(tr, 500)
+    k.mav(bl, 500)
+    k.msleep(cm * 66)
+    k.ao()
+    
+def spin(cm):
+    k.mav(tl,1000)
+    k.mav(tr,-1000)
+    k.mav(bl,1000)
+    k.mav(br,-1000)
+    k.msleep(66*cm)
+    k.ao()
+    
+def spinL(cm):
+    k.mav(tl,-1000)
+    k.mav(tr,1000)
+    k.mav(bl,-1000)
+    k.mav(br,1000)
+    k.msleep(66*cm)
+    
+def forward_right(cm):
+    k.mav(tl,1000)
+    k.mav(br,1000)
+    k.msleep(1000*cm)
+
+def back_right(cm):
+    k.mav(tr, -1000)
+    k.mav(bl, -1000)
+    k.msleep(1000*cm)
+def arm_down():
+    k.enable_servo(arm)
+    pos = k.get_servo_position(arm)
+    for i in range(pos, 70, -1):
+        k.set_servo_position(arm,i)
+        k.msleep(5)
+    
+def arm_up():
+    k.enable_servo(arm)
+    pos = k.get_servo_position(arm)
+    for i in range(pos, 1110):
+        k.set_servo_position(arm,i)
+        k.msleep(5)
+        
+def claw_open():
+    k.enable_servo(claw)
+    k.set_servo_position(claw, 200)
+    
+def claw_close():
+    k.enable_servo(claw)
+    k.set_servo_position(claw, 1900)
+    print("closing claw")
+    
+    
+def main():
+    print ("Hello World")
+    #start with the arm down over the other robot, move out of starting box
+    arm_up()
+    slide_right(40)
+    back_right(5.5)
+    spin(15) #line back up
+    slide_right(15) #line up w the pvc
+    k.msleep(1000)
+    
+    #spin(60)
+    go_straight(200, -1000)
+    k.ao()
+    #prepping to grab potato
+    arm_up()
+    go_straight(6,950)
+    k.msleep(1450)
+    k.ao()
+    claw_open()
+    arm_down()
+    slide_left(40)
+    #grabbing potato
+    k.ao()
+    claw_close()
+    arm_up()
+    k.msleep(1000)
+    #goes to fry machine
+    go_straight(30, -800)
+    k.ao()
+    slide_right(17)
+    k.msleep(1000)
+    
+    #drops in fry machine
+    claw_open()
+    k.enable_servo(arm)
+    k.set_servo_position(arm, 1150)
+    k.set_servo_position(arm,1250)
+    print("done")
+    #k.msleep(1000)
+    #spin(2)
+    #k.msleep(1000)
+    #forward_right(5)
+    
+    
+
+main()
