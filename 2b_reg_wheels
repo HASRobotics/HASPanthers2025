@@ -1,0 +1,171 @@
+#!/usr/bin/python
+import os, sys
+sys.path.append("usr/lib")
+import _kipr as k
+#variables
+leftWheel = 1
+rightWheel= 2
+bs_r = 300
+bs_l = 300
+
+claw = 2
+arm = 1
+    
+
+#directions
+def moveForward(cm):
+    k.motor(rightWheel,-bs_r)
+    k.motor(leftWheel,bs_l)
+    k.msleep(100*cm)
+    k.ao()
+def turnRight(cm):
+	k.motor(rightWheel,bs_r)
+	k.msleep(100*cm)
+	k.ao()
+def turnLeft(cm):
+	k.motor(leftWheel,-bs_l)
+	k.msleep(100*cm)
+	k.ao()
+        
+def turnRightForward(cm):
+	k.motor(leftWheel,bs_r)
+	k.msleep(100*cm)
+	k.ao()
+        
+def moveBack(cm):
+    k.motor(rightWheel,bs_r)
+    k.motor(leftWheel,-bs_l)
+    k.msleep(100*cm)
+    k.ao()
+def moveServo(servo,position):
+    k.enable_servos()
+    curr_pos = k.get_servo_position(servo)
+    while curr_pos != position:
+        if curr_pos < position:
+            curr_pos +=1
+        elif curr_pos > position:
+			curr_pos -= 1
+        k.msleep(1)
+        k.set_servo_position(servo, curr_pos)
+    k.disable_servos()
+   #start arm at 1150 and start claw at 1200 close claw at 700 for cup
+                
+def slowTurnLeft(): 
+	k.motor(leftWheel,-bs_l)
+	k.msleep(10)
+	k.ao()   
+        
+def slowTurnRight():
+	k.motor(rightWheel,bs_r)
+	k.msleep(10)
+	k.ao()
+        
+        
+def slowMoveForward():
+    k.motor(rightWheel,-bs_r)
+    k.motor(leftWheel,bs_l)
+    k.msleep(5)
+    k.ao()
+                
+def findCup(channel):
+	while k.get_object_count(channel) == 0: 
+		slowTurnLeft()
+		k.camera_update()
+             
+def centerCup(channel):
+	print(k.get_object_center_x(channel,0))
+	while k.get_object_center_x(channel,0) < 70 or k.get_object_center_x(channel,0) > 80:
+		print(k.get_object_center_x(channel,0))
+		if k.get_object_center_x(channel,0) < 70:
+			slowTurnLeft()
+			k.camera_update()
+		if k.get_object_center_x(channel,0) > 80:
+			slowTurnRight()
+			k.camera_update()
+                
+def goUntilButton():
+	print("hello")
+	while k.digital(9) == 0:
+		slowMoveForward()
+		centerCup(0)
+
+def detectBumper():
+	while k.digital(7) == 0:
+		turnRight()
+            
+def main():
+	moveServo(arm,100)
+	moveServo(claw,1900)
+	print ("Hello World")
+    #go straight
+	moveForward(25)
+	k.camera_open()
+	k.camera_update()
+	
+    #find cup and pull it from under the shelf
+	findCup(0)  
+	centerCup(0)
+	goUntilButton()
+	moveBack(6)
+	moveServo(claw,1100)
+	moveForward(6)
+	moveServo(claw,700)
+	moveBack(15) 
+        
+        
+    #let go of cup and angle robot do you can't see the cup
+	moveServo(claw,1400)
+	moveBack(5)
+	turnRightForward(5)
+	moveForward(9)
+	print("whats up")
+    
+    #grab drinks
+	k.camera_update()
+	slowTurnLeft()
+	findCup(0)
+	#print("hello")
+	#centerCup(0)
+	#print("hey")
+	
+        
+        
+	#moveServo(arm,0)
+	#k.camera_update()
+	#moveForward(8)
+	#findCup(0)
+        #finds pipe drink
+	#print("yippy")
+	#centerCup(0)
+	#goUntilButton()
+	#moveBack(2)
+	#print("closing")
+	#moveServo(claw, 600)
+	#pull pipe drink back
+	#moveBack(27)
+	#turnLeft(9)
+	#moveForward(10)
+	#goUntilButton()
+        #reach cup to drop drink
+	#moveServo(arm,1100)
+	#moveServo(claw,1000)
+        
+	print("its over")
+	#k.camera_update()
+	#k.msleep(2000)
+		
+    #More test runs with color ID, pink cup in middle. Ended with camera checks (sucessful ID) and adjusting values
+	#if (k.get_object_count(0) > 0):
+	#	slowDrop(claw,400)
+	#	print("yayaya")
+	#else:
+	#	print("I don't see pink :(")
+	#	moveBack(5)
+	#	turnRight(3)
+	#	moveBack(1)
+	#	turnLeft(3)
+	#	moveForward(2)
+            
+            
+main()
+
