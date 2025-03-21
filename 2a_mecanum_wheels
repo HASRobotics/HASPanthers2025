@@ -1,0 +1,103 @@
+#!/usr/bin/python
+import os, sys
+sys.path.append("/usr/lib")
+import _kipr as k
+
+#top left wheel
+tl = 0
+#bottom left wheel
+bl = 1
+#bottom right wheel
+br = 2
+#top right wheel
+tr = 3
+
+#servo for arm
+arm = 1
+#servo for claw
+claw = 0
+
+def slow_down(speed):
+    while speedl > 0 and speedr > 0:
+        k.mav(0 ,speedr)
+        k.mav(1 ,speedr)
+        k.mav(2 ,speedl - 50)
+        k.mav(3 ,speedl)
+        speedl -= 20
+        speedr -= 20
+
+def go_straight(cm):
+    k.mav(0, 1500)
+    k.mav(1, 1500)
+    k.mav(2, 1300)
+    k.mav(3, 1500)
+    cms = cm*48 - 3
+    k.msleep(cms)
+    #slowdown(1500, 1500)
+
+def crab_walk(cm):
+    if cm > 0:
+        k.mav(tl, -750)
+        k.mav(tr, 750)
+        k.mav(br, -750)
+        k.mav(bl, 750)
+        k.msleep(cm*66)
+    else:
+        k.mav(tl, 750)
+        k.mav(tr, -750)
+        k.mav(br, 750)
+        k.mav(bl, -750)
+        k.msleep(cm*-66)
+
+def turn(degrees):
+    print("hello")
+    if degrees > 0:
+        print("hi")
+        #turns clockwise
+        k.mav(tl, 750)
+        k.mav(tr, -750)
+        k.mav(br, -750)
+        k.mav(bl, 750)
+        k.msleep(degrees*25)
+    if degrees < 0:
+        k.mav(tl, -750)
+        k.mav(tr, 750)
+        k.mav(br, 750)
+        k.mav(bl, -750)
+        k.msleep(abs(degrees)*25)
+
+def arm_up():
+    global arm
+    k.enable_servo(arm)
+    k.set_servo_position(arm, 1660)
+
+def arm_down():
+    global arm
+    k.enable_servo(arm)
+    k.set_servo_position(arm, 1130)
+
+def claw_open():
+    global claw
+    k.enable_servo(claw)
+    k.set_servo_position(claw, 1000)
+
+def claw_close():
+    global claw
+    k.enable_servo(claw)
+    k.set_servo_position(claw, 216)
+
+def main():
+    global arm, claw
+    turn(-100)
+    go_straight(35)
+    turn(-110)
+    arm_down()
+    claw_open()
+    go_straight(6)
+    k.msleep(500)
+    claw_close()
+    k.msleep(500)
+    arm_up()
+
+    
+main()
